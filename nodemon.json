@@ -1,0 +1,30 @@
+{
+  "watch": [
+    "src",
+    "prisma/schema.prisma",
+    ".env"
+  ],
+  "ext": "ts,js,json,prisma,env",
+  "ignore": [
+    "src/**/*.test.ts",
+    "src/**/*.spec.ts", 
+    "node_modules",
+    "dist",
+    "coverage",
+    "*.log",
+    ".git",
+    "prisma/migrations"
+  ],
+  "exec": "tsx src/app.ts",
+  "env": {
+    "NODE_ENV": "development"
+  },
+  "events": {
+    "restart": "echo '🔄 Server restarting due to changes...'",
+    "crash": "echo '💥 Server crashed - waiting for file changes before restart'"
+  },
+  "delay": 1000,
+  "colours": true,
+  "legacyWatch": false,
+  "verbose": true
+}
