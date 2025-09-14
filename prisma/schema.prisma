@@ -1,0 +1,116 @@
+// Prisma Schema for Real-Time Polling Application
+// Move37 Ventures Backend Developer Challenge
+// 
+// This schema implements a complete polling system with:
+// - One-to-Many relationships: User -> Polls, Poll -> PollOptions
+// - Many-to-Many relationship: User <-> PollOptions (via Vote join table)
+// - Proper indexing for optimal query performance
+// - Cascade deletes for data integrity
+// 
+// Learn more: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  // Generate TypeScript types for better development experience
+  output   = "../node_modules/.prisma/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  // Connection pooling for production performance
+  relationMode = "prisma"
+}
+
+/// User model representing application users
+/// Implements the user side of one-to-many relationships with polls and votes
+model User {
+  id           String   @id @default(cuid()) /// Unique identifier using CUID for better performance
+  name         String   /// User's display name (required for poll attribution)
+  email        String   @unique /// Unique email for authentication (indexed automatically)
+  passwordHash String   @map("password_hash") /// Hashed password using bcrypt
+  createdAt    DateTime @default(now()) @map("created_at") /// Account creation timestamp
+  updatedAt    DateTime @updatedAt @map("updated_at") /// Last account update timestamp
+
+  // ONE-TO-MANY RELATIONSHIPS
+  polls        Poll[]   /// User can create multiple polls (creator relationship)
+  votes        Vote[]   /// User can cast multiple votes across different polls
+
+  // Database optimizations
+  @@index([email]) /// Index on email for fast authentication lookups
+  @@index([createdAt]) /// Index for sorting users by registration date
+  @@map("users") /// Custom table name following PostgreSQL conventions
+}
+
+/// Poll model representing voting polls created by users
+/// Demonstrates one-to-many relationship from User and to PollOptions
+model Poll {
+  id          String   @id @default(cuid()) /// Unique poll identifier
+  question    String   /// The poll question (required, non-empty)
+  isPublished Boolean  @default(false) @map("is_published") /// Publication status (drafts vs live polls)
+  createdAt   DateTime @default(now()) @map("created_at") /// Poll creation timestamp
+  updatedAt   DateTime @updatedAt @map("updated_at") /// Last poll modification timestamp
+
+  // FOREIGN KEY for one-to-many relationship
+  creatorId   String   @map("creator_id") /// References User.id (poll creator)
+
+  // RELATIONSHIPS
+  creator     User         @relation(fields: [creatorId], references: [id], onDelete: Cascade) /// Many polls to one user
+  options     PollOption[] /// One poll to many options (one-to-many relationship)
+
+  // Database optimizations and constraints
+  @@index([creatorId]) /// Index for efficient creator lookups
+  @@index([isPublished]) /// Index for filtering published polls
+  @@index([createdAt]) /// Index for sorting polls by creation date
+  @@index([creatorId, isPublished]) /// Composite index for user's published polls
+  @@map("polls") /// Custom table name following PostgreSQL conventions
+}
+
+/// PollOption model representing individual voting choices within a poll
+/// Implements the "many" side of Poll -> PollOptions one-to-many relationship
+model PollOption {
+  id     String @id @default(cuid()) /// Unique option identifier
+  text   String /// The option text/choice (required for voting)
+
+  // FOREIGN KEY for one-to-many relationship
+  pollId String @map("poll_id") /// References Poll.id (parent poll)
+
+  // RELATIONSHIPS
+  poll   Poll   @relation(fields: [pollId], references: [id], onDelete: Cascade) /// Many options to one poll
+  votes  Vote[] /// One option to many votes (enables vote counting)
+
+  // Database optimizations
+  @@index([pollId]) /// Index for efficient poll option lookups
+  @@map("poll_options") /// Custom table name following PostgreSQL conventions
+}
+
+/// Vote model - Junction table implementing Many-to-Many relationship
+/// Connects Users and PollOptions, allowing users to vote on poll options
+/// This is the classic "join table" pattern for many-to-many relationships
+model Vote {
+  id           String   @id @default(cuid()) /// Unique vote identifier
+  createdAt    DateTime @default(now()) @map("created_at") /// Vote timestamp (for analytics)
+
+  // FOREIGN KEYS creating the many-to-many relationship
+  userId       String   @map("user_id") /// References User.id (who voted)
+  pollOptionId String   @map("poll_option_id") /// References PollOption.id (what they voted for)
+
+  // RELATIONSHIPS completing the many-to-many pattern
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade) /// Vote belongs to user
+  pollOption   PollOption @relation(fields: [pollOptionId], references: [id], onDelete: Cascade) /// Vote belongs to option
+
+  // DATA INTEGRITY CONSTRAINTS
+  @@unique([userId, pollOptionId], name: "unique_user_option_vote") /// Prevent duplicate votes on same option
+  
+  // Database optimizations for common queries
+  @@index([userId]) /// Index for user's voting history
+  @@index([pollOptionId]) /// Index for option vote counts
+  @@index([createdAt]) /// Index for vote timeline analytics
+  @@map("votes") /// Custom table name following PostgreSQL conventions
+}
+
+// Database-level enhancements for production
+// Additional indexes for complex queries could be added here:
+// - Composite indexes for reporting queries
+// - Partial indexes for specific use cases
+// - Custom database functions for vote aggregation
