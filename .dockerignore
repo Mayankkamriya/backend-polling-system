@@ -1,0 +1,39 @@
+# Docker ignore file for Real-time Polling API
+node_modules
+npm-debug.log
+Dockerfile
+.dockerignore
+.git
+.gitignore
+README.md
+.env
+.nyc_output
+coverage
+.nyc_output
+.coverage
+.coverage/
+dist
+.DS_Store
+*.log
+.vscode
+.idea
+
+# Development files
+nodemon.json
+.env.local
+.env.development
+
+# Test files
+**/*.test.ts
+**/*.spec.ts
+test/
+tests/
+__tests__/
+
+# Build artifacts
+build/
+dist/
+
+# Temporary files
+tmp/
+temp/
