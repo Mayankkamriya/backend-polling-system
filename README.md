@@ -379,7 +379,7 @@ Content-Type: application/json
 
 #### **2. Get All Polls**
 ```http
-GET /api/polls?page=1&limit=10&published=true
+GET /api/polls?page=1&limit=10
 ```
 
 #### **3. Get Single Poll**
