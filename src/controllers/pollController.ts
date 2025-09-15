@@ -67,10 +67,21 @@ export class PollController {
 
     // By default, only show published polls for public consumption
     // Set to false explicitly or provide 'all' to see unpublished polls
-    if (published !== undefined) {
-      where.isPublished = published;
+ if (published !== undefined) {
+      let publishedValue: boolean;
+     
+      // Convert string 'true'/'false' to boolean
+      if (typeof published === 'string') {
+        publishedValue = published.toLowerCase() === 'true';
+      } else if (typeof published === 'boolean') {
+        publishedValue = published;
+      } else {
+        publishedValue = Boolean(published);
+      }
+     
+      where.isPublished = publishedValue;
     } else {
-      where.isPublished = true; // Default to only published polls
+      // No isPublished filter added, so returns all polls
     }
 
     if (creator) {

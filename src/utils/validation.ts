@@ -102,8 +102,8 @@ export const pollQuerySchema = z.object({
   published: z
     .string()
     .optional()
-    .transform(val => val === 'true'),
-
+    .transform(val => val !== undefined ? val === 'true' : undefined), // Only transform if provided
+    // .transform(val => val === 'true'),
   creator: z
     .string()
     .optional(),
