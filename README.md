@@ -282,8 +282,8 @@ POST /api/auth/register
 Content-Type: application/json
 
 {
-  "name": "John Doe",
-  "email": "john@example.com",
+  "name": "Amit Kumar",
+  "email": "amit@gmail.com",
   "password": "SecurePassword123!"
 }
 ```
@@ -294,8 +294,8 @@ Content-Type: application/json
   "message": "User registered successfully",
   "user": {
     "id": "cuid_user_id",
-    "name": "John Doe",
-    "email": "john@example.com",
+    "name": "Amit Kumar",
+    "email": "amit@gmail.com",
     "createdAt": "2025-09-12T10:00:00.000Z"
   },
   "tokens": {
@@ -311,7 +311,7 @@ POST /api/auth/login
 Content-Type: application/json
 
 {
-  "email": "john@example.com",
+  "email": "amit@gmail.com",
   "password": "SecurePassword123!"
 }
 ```
@@ -371,7 +371,7 @@ Content-Type: application/json
     ],
     "creator": {
       "id": "cuid_user_id",
-      "name": "John Doe"
+      "name": "Amit Kumar"
     }
   }
 }
